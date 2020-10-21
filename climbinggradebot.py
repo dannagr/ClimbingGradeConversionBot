@@ -13,7 +13,7 @@ with open('gradeconversions.csv', 'rt') as csvfile:
         NAtoEU[row[0]] = row[1]
         EUtoNA[row[1]] = row[0]
 
-# source: https://github.com/shantnu/RedditBot/blob/master/Part2/reply_post.py
+# source for lines 17-26: https://github.com/shantnu/RedditBot/blob/master/Part2/reply_post.py
 if not os.path.isfile("do_not_comment.txt"):
     do_not_comment = []
 
@@ -39,11 +39,19 @@ def comment(grade, submission, conversion):
         submission.reply("**" + grade + "** converts to **" + conversion[grade] + "**")
         do_not_comment.append(submission.id)
 
+# If u/MountainProjectBot already commented, ignore this post
+def search_for_proj_bot(submission):
+    submission.comments.replace_more(limit=0)
+    for top_level_comment in submission.comments:
+        if top_level_comment.author == "MountainProjectBot":
+            do_not_comment.append(submission.id)
+
 def find_grade_in_title(submission, regex, conversion, prefix=""):
     title_found = re.search(regex, submission.title)
     if title_found:
         grade = prefix + title_found.group(0).lower()
         if grade in conversion:
+            search_for_proj_bot(submission)
             comment(grade, submission, conversion)
 
 
@@ -57,4 +65,3 @@ for submission in subreddit.hot(limit=5):
 with open("do_not_comment.txt", "w") as f:
     for post_id in do_not_comment:
         f.write(post_id + "\n")
-        
