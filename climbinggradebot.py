@@ -30,13 +30,16 @@ french_grades_regex="[4-9][abcABC][+]?"
 # ex: 5.9
 yosemite_grades_regex="[5][.]\d\d?[abcdABCD]?[+-]?"
 # ex: 10a/b
-yosemite_shorthand_regex="1\d[abcdABCD]?[abcdABCD]?(\/[abcdABCD])?[+-]?"
+yosemite_shorthand_regex="1\d[abcdABCD](\/[abcdABCD])?[+-]?"
 
 
-def comment(grade, submission, conversion):
-    if submission.id not in do_not_comment:
-        # print("**" + grade + "** converts to **" + conversion[grade] + "**")
-        submission.reply("**" + grade + "** converts to **" + conversion[grade] + "**")
+def comment(grade, submission, convertedGrade):
+    # converted grade is already in the title, ignore this post
+    if re.search(convertedGrade, submission.title):
+        do_not_comment.append(submission.id)
+
+    elif submission.id not in do_not_comment:
+        submission.reply("**" + grade + "** converts to **" + convertedGrade + "**")
         do_not_comment.append(submission.id)
 
 # If u/MountainProjectBot already commented, ignore this post
@@ -52,15 +55,13 @@ def find_grade_in_title(submission, regex, conversion, prefix=""):
         grade = prefix + title_found.group(0).lower()
         if grade in conversion:
             search_for_proj_bot(submission)
-            comment(grade, submission, conversion)
-
+            comment(grade, submission, conversion[grade])
 
 subreddit = reddit.subreddit("slabistheworst")
-for submission in subreddit.hot(limit=5):
+for submission in subreddit.new(limit=15):
     find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
     find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
     find_grade_in_title(submission, french_grades_regex, EUtoNA)
-
 
 with open("do_not_comment.txt", "w") as f:
     for post_id in do_not_comment:
