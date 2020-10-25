@@ -35,9 +35,8 @@ yosemite_shorthand_regex="1\d[abcdABCD](\/[abcdABCD])?[+-]?"
 
 def comment(grade, submission, convertedGrade):
     if submission.id not in do_not_comment:
-        # only comment if converted grade is not already in the title
+        # only comment if the converted grade is not already in the title
         if not re.search(convertedGrade, submission.title):
-            print("commenting: **" + grade + "** converts to **" + convertedGrade + "**")
             submission.reply("**" + grade + "** converts to **" + convertedGrade + "**")
         do_not_comment.append(submission.id)
 
@@ -46,7 +45,6 @@ def search_for_proj_bot(submission):
     submission.comments.replace_more(limit=0)
     for top_level_comment in submission.comments:
         if top_level_comment.author == "MountainProjectBot":
-            print("found a comment by MountainProjectBot: " + top_level_comment.body)
             do_not_comment.append(submission.id)
 
 def find_grade_in_title(submission, regex, conversion, prefix=""):
@@ -54,12 +52,11 @@ def find_grade_in_title(submission, regex, conversion, prefix=""):
     if title_found:
         grade = prefix + title_found.group(0).lower()
         if grade in conversion:
-            print("grade in title found: " + submission.title)
             search_for_proj_bot(submission)
             comment(grade, submission, conversion[grade])
 
-subreddit = reddit.subreddit("climbing")
-for submission in subreddit.new(limit=15):
+subreddit = reddit.subreddit("slabistheworst+climbing")
+for submission in subreddit.new(limit=10):
     find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
     find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
     find_grade_in_title(submission, french_grades_regex, EUtoNA)
