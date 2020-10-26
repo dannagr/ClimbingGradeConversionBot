@@ -26,7 +26,7 @@ else:
         do_not_comment = list(filter(None, do_not_comment))
 
 # ex: 7c+
-french_grades_regex="[4-9][abcABC][+]?"
+french_grades_regex="[4-9][abc][+]?"
 # ex: 5.9
 yosemite_grades_regex="[5][.]\d\d?[abcdABCD]?[+-]?"
 # ex: 10a/b
