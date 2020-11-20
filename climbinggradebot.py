@@ -57,9 +57,10 @@ def find_grade_in_title(submission, regex, conversion, prefix=""):
 
 subreddit = reddit.subreddit("slabistheworst+climbing")
 for submission in subreddit.new(limit=10):
-    find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
-    find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
-    find_grade_in_title(submission, french_grades_regex, EUtoNA)
+    if submission.id not in do_not_comment:
+        find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
+        find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
+        find_grade_in_title(submission, french_grades_regex, EUtoNA)
 
 with open("do_not_comment.txt", "w") as f:
     for post_id in do_not_comment:
