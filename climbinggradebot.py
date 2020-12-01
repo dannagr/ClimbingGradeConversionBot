@@ -1,9 +1,18 @@
+#!/usr/local/bin/python3
+
 import csv
 import os
 import praw
 import re
+import time
 
-reddit = praw.Reddit('climbingbot')
+reddit = praw.Reddit(
+    client_id="9IkwaHYti7XzvA",
+    client_secret="FNMsLCWkjfik11_zsWa76Mrpv7g",
+    password="382Poo01!",
+    username="GradeConversionBot",
+    user_agent="climbing-grade-conversion"
+)
 
 NAtoEU = {}
 EUtoNA= {}
@@ -55,12 +64,26 @@ def find_grade_in_title(submission, regex, conversion, prefix=""):
             search_for_proj_bot(submission)
             comment(grade, submission, conversion[grade])
 
-subreddit = reddit.subreddit("slabistheworst+climbing")
+def check_recent_comments():
+    for comment in reddit.redditor("GradeConversionBot").comments.new(limit=5):
+        post = comment.submission
+        print("score: " + str(comment.score))
+        if comment.score <= -1:
+            comment.delete()
+            print("deleted comment " + str(comment.id))
+
+        post.comments.replace_more(limit=0)
+        for top_level_comment in post.comments:
+            if top_level_comment.author == "MountainProjectBot":
+                comment.delete()
+
+subreddit = reddit.subreddit("slabistheworst")
 for submission in subreddit.new(limit=10):
     if submission.id not in do_not_comment:
         find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
         find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
         find_grade_in_title(submission, french_grades_regex, EUtoNA)
+check_recent_comments()
 
 with open("do_not_comment.txt", "w") as f:
     for post_id in do_not_comment:
