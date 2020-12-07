@@ -6,13 +6,7 @@ import praw
 import re
 import time
 
-reddit = praw.Reddit(
-    client_id="9IkwaHYti7XzvA",
-    client_secret="FNMsLCWkjfik11_zsWa76Mrpv7g",
-    password="382Poo01!",
-    username="GradeConversionBot",
-    user_agent="climbing-grade-conversion"
-)
+reddit = praw.Reddit('climbingbot')
 
 NAtoEU = {}
 EUtoNA= {}
