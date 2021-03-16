@@ -70,7 +70,7 @@ def check_recent_comments():
             if top_level_comment.author == "MountainProjectBot":
                 comment.delete()
 
-subreddit = reddit.subreddit("rockclimbing+slabistheworst+climbing")
+subreddit = reddit.subreddit("rockclimbing+slabistheworst+climbing+climbingporn")
 for submission in subreddit.new(limit=10):
     find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
     find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
