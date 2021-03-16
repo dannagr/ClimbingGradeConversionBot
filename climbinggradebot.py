@@ -1,5 +1,3 @@
-#!/usr/local/bin/python3
-
 import csv
 import os
 import praw
@@ -34,12 +32,13 @@ french_grades_regex="[4-9][abc][+]?"
 yosemite_grades_regex="[5][.]\d\d?[abcdABCD]?[+-]?"
 # ex: 10a/b
 yosemite_shorthand_regex="1\d[abcdABCD](\/[abcdABCD])?[+-]?"
-
+uk="[uU][kK]"
 
 def comment(grade, submission, convertedGrade):
     if submission.id not in do_not_comment:
-        # only comment if the converted grade is not already in the title
-        if not re.search(convertedGrade, submission.title):
+        # only comment if converted grade is not already in the title
+        if not re.search(convertedGrade, submission.title) and not re.search(uk, submission.title):
+            print("commenting: **" + grade + "** converts to **" + convertedGrade + "**")
             submission.reply("**" + grade + "** converts to **" + convertedGrade + "**")
         do_not_comment.append(submission.id)
 
@@ -49,6 +48,7 @@ def search_for_proj_bot(submission):
     for top_level_comment in submission.comments:
         if top_level_comment.author == "MountainProjectBot":
             do_not_comment.append(submission.id)
+
 
 def find_grade_in_title(submission, regex, conversion, prefix=""):
     title_found = re.search(regex, submission.title)
@@ -61,7 +61,6 @@ def find_grade_in_title(submission, regex, conversion, prefix=""):
 def check_recent_comments():
     for comment in reddit.redditor("GradeConversionBot").comments.new(limit=5):
         post = comment.submission
-        print("score: " + str(comment.score))
         if comment.score <= -1:
             comment.delete()
             print("deleted comment " + str(comment.id))
@@ -71,12 +70,11 @@ def check_recent_comments():
             if top_level_comment.author == "MountainProjectBot":
                 comment.delete()
 
-subreddit = reddit.subreddit("slabistheworst")
+subreddit = reddit.subreddit("rockclimbing+slabistheworst+climbing")
 for submission in subreddit.new(limit=10):
-    if submission.id not in do_not_comment:
-        find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
-        find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
-        find_grade_in_title(submission, french_grades_regex, EUtoNA)
+    find_grade_in_title(submission, yosemite_shorthand_regex, NAtoEU, "5.")
+    find_grade_in_title(submission, yosemite_grades_regex, NAtoEU)
+    find_grade_in_title(submission, french_grades_regex, EUtoNA)
 check_recent_comments()
 
 with open("do_not_comment.txt", "w") as f:
